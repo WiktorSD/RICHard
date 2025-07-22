@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head><title>Rejestracja</title></head>
+<body>
+    <h2>Rejestracja</h2>
+    {% with messages = get_flashed_messages() %}
+      {% for message in messages %}
+        <p style="color:red;">{{ message }}</p>
+      {% endfor %}
+    {% endwith %}
+    <form method="post">
+        <input type="text" name="username" placeholder="Nazwa użytkownika" required><br>
+        <input type="password" name="password" placeholder="Hasło" required><br>
+        <button type="submit">Zarejestruj się</button>
+    </form>
+    <p>Masz konto? <a href="{{ url_for('login') }}">Zaloguj się</a></p>
+</body>
+</html>
