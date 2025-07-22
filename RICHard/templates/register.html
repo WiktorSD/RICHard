@@ -1,11 +1,19 @@
 <!DOCTYPE html>
 <html>
-<head><title>Rejestracja</title></head>
+<head>
+    <title>Rejestracja</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
 <body>
     <h2>Rejestracja</h2>
-    {% with messages = get_flashed_messages() %}
+    {% with messages = get_flashed_messages(category_filter=["success"]) %}
       {% for message in messages %}
-        <p style="color:red;">{{ message }}</p>
+        <div class="flash-success">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+    {% with messages = get_flashed_messages(category_filter=["error"]) %}
+      {% for message in messages %}
+        <div class="flash-error">{{ message }}</div>
       {% endfor %}
     {% endwith %}
     <form method="post">
