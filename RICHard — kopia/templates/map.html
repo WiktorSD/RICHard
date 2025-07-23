@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mapa</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="map-bg" style="background: url('/static/img/background2.jpg') no-repeat center center fixed; background-size: cover;">
+    <nav class="navbar">
+        <div class="navbar-left">
+            <span class="navbar-brand">RICHard</span>
+            <a href="{{ url_for('home') }}" class="nav-link">Strona główna</a>
+            <a href="#" class="nav-link">O nas</a>
+            <a href="#" class="nav-link">Kontakt</a>
+        </div>
+        <div class="navbar-right">
+            {% if username %}
+                <span class="navbar-user">Witaj, {{ username }}!</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-nav">Wyloguj się</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-nav">Zaloguj się</a>
+            {% endif %}
+        </div>
+    </nav>
+    <div class="map-container">
+        <h2>Mapa województwa świętokrzyskiego</h2>
+        <form class="map-form" method="post" style="margin-bottom: 24px; background: #f7f7f7; padding: 18px; border-radius: 8px; max-width: 500px;">
+            <div style="margin-bottom: 12px;">
+                <div style="margin-bottom: 8px;">
+                    <button type="button" id="cityBtn" class="btn btn-nav" style="margin-right:6px;">Miasto</button>
+                    <button type="button" id="coordsBtn" class="btn btn-nav">Współrzędne</button>
+                </div>
+                <label for="location" id="locationLabel" style="display:none;">Miasto lub współrzędne:</label>
+                <input type="text" id="location" name="location" placeholder="" required style="width: 100%; display:none;">
+            </div>
+            <div style="margin-bottom: 12px;">
+                <label for="buffer">Bufor (km):</label>
+                <input type="number" id="buffer" name="buffer" min="1" max="50" value="5" required style="width: 100px;">
+            </div>
+            <div style="margin-bottom: 12px;">
+                <label for="satellite">Wybierz satelitę:</label>
+                <select id="satellite" name="satellite" required style="width: 150px;">
+                    <option value="sentinel1">Sentinel-1</option>
+                    <option value="sentinel2">Sentinel-2</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-map">Pokaż mapę</button>
+        </form>
+        <div style="height:400px; background:#eee; display:flex; align-items:center; justify-content:center;">
+            <span>Mapa będzie tutaj</span>
+        </div>
+    </div>
+    <script>
+        const cityBtn = document.getElementById('cityBtn');
+        const coordsBtn = document.getElementById('coordsBtn');
+        const locationInput = document.getElementById('location');
+        const locationLabel = document.getElementById('locationLabel');
+
+        cityBtn.addEventListener('click', function() {
+            locationLabel.textContent = "Miasto:";
+            locationInput.placeholder = "np. Kielce";
+            locationLabel.style.display = "block";
+            locationInput.style.display = "block";
+            cityBtn.classList.add('active');
+            coordsBtn.classList.remove('active');
+        });
+
+        coordsBtn.addEventListener('click', function() {
+            locationLabel.textContent = "Współrzędne:";
+            locationInput.placeholder = "np. 50.8661, 20.6286";
+            locationLabel.style.display = "block";
+            locationInput.style.display = "block";
+            coordsBtn.classList.add('active');
+            cityBtn.classList.remove('active');
+        });
+
+        // Na start pole i label są ukryte
+    </script>
+</body>
+</html>
