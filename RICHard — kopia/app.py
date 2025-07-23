@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import mysql.connector
 from mysql.connector import Error
+from sentinel_downloader import get_quicklooks
 
 app = Flask(__name__)
 app.secret_key = 'tajny_klucz'
@@ -8,9 +9,9 @@ app.secret_key = 'tajny_klucz'
 # Konfiguracja połączenia z MySQL
 MYSQL_CONFIG = {
     'host': 'localhost',
-    'user': 'root',      # <- zmień na swojego użytkownika MySQL
-    'password': 'Pr@ktyk@nt1',      # <- zmień na swoje hasło MySQL
-    'database': 'users'        # <- zmień na swoją bazę danych MySQL
+    'user': 'root',
+    'password': 'Pr@ktyk@nt1',
+    'database': 'users'
 }
 
 def get_db_connection():
@@ -20,8 +21,6 @@ def init_db():
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        # Usuń poniższą linię, aby nie usuwać tabeli przy każdym starcie
-        # cursor.execute('DROP TABLE IF EXISTS users')
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -37,9 +36,7 @@ def init_db():
 
 @app.route('/')
 def home():
-    username = None
-    if 'username' in session:
-        username = session['username']
+    username = session.get('username')
     return render_template('home.html', username=username)
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -52,14 +49,10 @@ def register():
             flash("Hasło musi mieć co najmniej 6 znaków.", "error")
             return redirect(url_for('register'))
 
-        # hashed_password = generate_password_hash(password)
-        # Zapisz hasło wprost (niezalecane w produkcji!)
-        plain_password = password
-
         try:
             conn = get_db_connection()
             cursor = conn.cursor()
-            cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, plain_password))
+            cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, password))
             conn.commit()
             cursor.close()
             conn.close()
@@ -87,7 +80,6 @@ def login():
         cursor.close()
         conn.close()
 
-        # Porównaj hasło wprost
         if row and row[0] == password:
             session['username'] = username
             return redirect(url_for('home'))
@@ -108,6 +100,14 @@ def map():
     if 'username' not in session:
         return redirect(url_for('login'))
     return render_template('map.html', username=session.get('username'))
+
+@app.route('/map_result')
+def map_result():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    username = session.get('username')
+    quicklooks = get_quicklooks()  # Pobieranie danych z API
+    return render_template('map_result.html', username=username, quicklooks=quicklooks)
 
 if __name__ == '__main__':
     init_db()

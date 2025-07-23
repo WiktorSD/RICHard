@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Wyniki Mapy</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        #map {
+            height: 90vh;
+            width: 100%;
+        }
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .top-bar {
+            padding: 10px;
+            background-color: #2c3e50;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="top-bar">
+    <span>Witaj, {{ username }}!</span> |
+    <a href="{{ url_for('logout') }}" style="color: #f39c12;">Wyloguj się</a>
+    <h2>Obrazy Sentinel-2 z ostatnich 30 dni</h2>
+</div>
+
+<div id="map"></div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    // Inicjalizacja mapy w centrum Polski
+    var map = L.map('map').setView([52.1, 19.4], 6);
+
+    // Warstwa bazowa z OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Przykładowy marker (Warszawa)
+    L.marker([52.2297, 21.0122]).addTo(map).bindPopup("Warszawa").openPopup();
+
+</script>
+
+</body>
+</html>
