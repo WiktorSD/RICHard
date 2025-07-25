@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rejestracja</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h2>Rejestracja</h2>
+    {% with messages = get_flashed_messages(category_filter=["success"]) %}
+      {% for message in messages %}
+        <div class="flash-success">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+    {% with messages = get_flashed_messages(category_filter=["error"]) %}
+      {% for message in messages %}
+        <div class="flash-error">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+    <form method="post">
+        <input type="text" name="username" placeholder="Nazwa użytkownika" required><br>
+        <input type="password" name="password" placeholder="Hasło" required><br>
+        <button type="submit">Zarejestruj się</button>
+    </form>
+    <p>Masz konto? <a href="{{ url_for('login') }}">Zaloguj się</a></p>
+</body>
+</html>
