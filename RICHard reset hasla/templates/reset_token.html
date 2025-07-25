@@ -1,0 +1,18 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Nowe hasło</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Nowe hasło</h2>
+        <form method="POST">
+            <input type="password" name="password" placeholder="Nowe hasło" required><br>
+            <input type="password" name="confirm" placeholder="Powtórz hasło" required><br>
+            <button type="submit">Zmień hasło</button>
+        </form>
+    </div>
+</body>
+</html>

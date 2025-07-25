@@ -1,0 +1,17 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Resetowanie hasła</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Resetowanie hasła</h2>
+        <form method="POST">
+            <input type="email" name="email" placeholder="Wpisz swój email" required>
+            <button type="submit">Wyślij link resetujący</button>
+        </form>
+    </div>
+</body>
+</html>

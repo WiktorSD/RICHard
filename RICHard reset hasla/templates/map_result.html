@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Mapa z nazwą miasta</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <style>
+    body, html { margin: 0; padding: 0; }
+    #map { width: 100%; height: 100vh; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
+
+  <script>
+    const GEOAPIFY_KEY = 'ceb6c0c38bd541ba9639dcdcd7c8725f'; // <<< WSTAW SWÓJ KLUCZ API
+
+    var map = L.map('map').setView([50.8661, 20.6286], 9);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Ładowanie geojson z województwami
+    fetch('{{ url_for("static", filename="polska-wojewodztwa.geojson") }}')
+      .then(r => r.json())
+      .then(data => {
+        L.geoJSON(data, {
+          style: { color: '#333', weight: 2, fillOpacity: 0.1 }
+        }).addTo(map);
+
+        // Znajdź świętokrzyskie
+        let sw = data.features.find(f =>
+          f.properties && (f.properties.nazwa === 'Świętokrzyskie' || f.properties.id === 'PL26')
+        );
+        if (sw) {
+          let layer = L.geoJSON(sw, { style: { color: '#f00', weight: 3, fillOpacity: 0.2 } }).addTo(map);
+          map.fitBounds(layer.getBounds());
+
+          let buf = turf.buffer(sw, 50, { units: 'kilometers' });
+          L.geoJSON(buf, { style: { color: '#00f', weight: 2, dashArray: '5,5', fillOpacity: 0 } }).addTo(map);
+        }
+      })
+      .catch(err => console.error(err));
+
+    // Obsługa kliknięcia – marker + Geoapify
+    let clickedMarker = null;
+
+    map.on('click', async function(e) {
+      const lat = e.latlng.lat;
+      const lon = e.latlng.lng;
+
+      if (clickedMarker) map.removeLayer(clickedMarker);
+
+      const name = await fetchCityName(lat, lon);
+
+      clickedMarker = L.marker([lat, lon]).addTo(map);
+      clickedMarker.bindPopup(name).openPopup();
+    });
+
+    async function fetchCityName(lat, lon) {
+  const url = `https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lon}&apiKey=${GEOAPIFY_KEY}`;
+
+  try {
+    const resp = await fetch(url);
+    const data = await resp.json();
+
+    if (data.features && data.features.length > 0) {
+      const props = data.features[0].properties;
+
+      const city = props.city || props.town || props.village || props.suburb || 'Brak';
+      const county = props.county || 'Brak powiatu';
+      const state = props.state || 'Brak województwa';
+
+      return `
+        <b>${city}</b><br>
+        <small>Powiat: ${county}</small><br>
+        <small>Województwo: ${state}</small><br>
+        <small>Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}</small>
+      `;
+    } else {
+      return `Brak danych<br>Lat: ${lat.toFixed(4)}<br>Lon: ${lon.toFixed(4)}`;
+    }
+  } catch (err) {
+    console.error("Geoapify błąd:", err);
+    return `Błąd API<br>Lat: ${lat.toFixed(4)}<br>Lon: ${lon.toFixed(4)}`;
+  }
+}
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mapa</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="map-bg" style="background: url('/static/img/background2.jpg') no-repeat center center fixed; background-size: cover;">
+    <nav class="navbar">
+        <div class="navbar-left">
+            <span class="navbar-brand">RICHard</span>
+            <a href="{{ url_for('home') }}" class="nav-link">Strona główna</a>
+            <a href="#" class="nav-link">O nas</a>
+            <a href="#" class="nav-link">Kontakt</a>
+        </div>
+        <div class="navbar-right">
+            {% if username %}
+                <span class="navbar-user">Witaj, {{ username }}!</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-nav">Wyloguj się</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-nav">Zaloguj się</a>
+            {% endif %}
+        </div>
+    </nav>
+    <div class="map-container">
+        <h2>Mapa województwa świętokrzyskiego</h2>
+        <form class="map-form" method="get" action="{{ url_for('map_result') }}" id="showMapForm">
+            <div class="form-group">
+                <div class="form-btns">
+                    <button type="button" id="cityBtn" class="btn btn-nav">Miasto</button>
+                    <button type="button" id="coordsBtn" class="btn btn-nav">Współrzędne</button>
+                </div>
+                <label for="location" id="locationLabel" class="location-label">Miasto:</label>
+                <input type="text" id="location" name="location" class="location-input" placeholder="np. Kielce" required>
+            </div>
+            <div class="form-group">
+                <label for="buffer">Bufor (km):</label>
+                <input type="number" id="buffer" name="buffer" min="1" max="50" value="5" required class="buffer-input">
+            </div>
+            <div class="form-group">
+                <label for="satellite">Wybierz satelitę:</label>
+                <select id="satellite" name="satellite" required class="satellite-select">
+                    <option value="sentinel1">Sentinel-1</option>
+                    <option value="sentinel2">Sentinel-2</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-map">Pokaż mapę</button>
+        </form>
+    </div>
+    <script>
+        const cityBtn = document.getElementById('cityBtn');
+        const coordsBtn = document.getElementById('coordsBtn');
+        const locationInput = document.getElementById('location');
+        const locationLabel = document.getElementById('locationLabel');
+
+        if (cityBtn && coordsBtn && locationInput && locationLabel) {
+            cityBtn.addEventListener('click', function() {
+                locationLabel.textContent = "Miasto:";
+                locationInput.placeholder = "np. Kielce";
+                cityBtn.classList.add('active');
+                coordsBtn.classList.remove('active');
+            });
+
+            coordsBtn.addEventListener('click', function() {
+                locationLabel.textContent = "Współrzędne:";
+                locationInput.placeholder = "np. 50.8661, 20.6286";
+                coordsBtn.classList.add('active');
+                cityBtn.classList.remove('active');
+            });
+
+            // Domyślnie tryb miasta
+            cityBtn.classList.add('active');
+        }
+
+        // Leaflet map logic
+        const showMapForm = document.getElementById('showMapForm');
+        const leafletMapDiv = document.getElementById('leafletMap');
+        let leafletMap = null;
+
+        if (showMapForm && leafletMapDiv) {
+            showMapForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                leafletMapDiv.style.display = 'block';
+                if (!leafletMap) {
+                    leafletMap = L.map('leafletMap').setView([52.0, 19.2], 6); // Central Poland
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 13,
+                        attribution: '&copy; OpenStreetMap contributors'
+                    }).addTo(leafletMap);
+
+                    // Granice Polski + bufor (ok. 50km)
+                    const bounds = L.latLngBounds(
+                        [48.5, 13.5], // SW (południowy zachód)
+                        [55.2, 25.0]  // NE (północny wschód)
+                    );
+                    leafletMap.fitBounds(bounds);
+
+                    // Opcjonalnie: obrysuj prostokąt
+                    L.rectangle(bounds, {color: "#1976d2", weight: 2, fillOpacity: 0.05}).addTo(leafletMap);
+                } else {
+                    leafletMap.invalidateSize();
+                }
+                // Możesz tu dodać marker na podstawie miasta/współrzędnych jeśli chcesz
+            });
+        }
+    </script>
+    <footer class="footer">
+        <div class="footer-content">
+            <span class="footer-brand">RICHard</span>
+            <span class="footer-separator">|</span>
+            <span class="footer-mail">kontakt@richard-app.pl</span>
+            <span class="footer-separator">|</span>
+            <span class="footer-copy">&copy; 2024</span>
+        </div>
+    </footer>
+</body>
+</html>
+    </footer>
+</body>
+</html>
