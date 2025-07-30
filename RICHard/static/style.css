@@ -1,0 +1,357 @@
+:root {
+    --main-blue: #1976d2;
+}
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    padding-top: 80px; /* aby treść nie była pod paskiem nawigacji */
+}
+
+h2 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+form {
+    background: #fff;
+    padding: 30px 40px;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(44, 62, 80, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    min-width: 300px;
+}
+
+input[type="text"], input[type="password"] {
+    padding: 10px;
+    border: 1px solid #bfc9d1;
+    border-radius: 4px;
+    font-size: 1em;
+    outline: none;
+    transition: border 0.2s;
+}
+
+input[type="text"]:focus, input[type="password"]:focus {
+    border-color: #2980b9;
+}
+
+button,
+.btn,
+.btn-map {
+    background: var(--main-blue);
+    color: #fff;
+    border: none;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+button:hover,
+.btn:hover,
+.btn-map:hover {
+    background: #12509a;
+}
+
+p {
+    margin-top: 20px;
+    color: #34495e;
+}
+
+a {
+    color: var(--main-blue);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.home-container {
+    background: none;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 30px;
+}
+
+.home-container h1 {
+    color: #2c3e50;
+    margin-bottom: 30px;
+}
+
+.home-buttons {
+    display: flex;
+    gap: 20px;
+}
+
+.btn {
+    background: #2980b9;
+    color: #fff;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s;
+    box-shadow: 0 1px 4px rgba(44, 62, 80, 0.08);
+}
+
+.btn:hover {
+    background: #1c5980;
+}
+
+.navbar {
+    width: 100%;
+    background: var(--main-blue);
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 40px;
+    height: 64px;
+    box-sizing: border-box;
+    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+}
+
+.navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.3em;
+    margin-right: 24px;
+    letter-spacing: 1px;
+}
+
+.nav-link {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1em;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.nav-link:hover {
+    background: #1c5980;
+}
+
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.navbar-user {
+    margin-right: 10px;
+    font-size: 1em;
+    color: #e0e6ed;
+}
+
+.btn.btn-nav {
+    padding: 7px 18px;
+    font-size: 0.98em;
+    color: var(--main-blue);
+    background: #fff;
+    border-radius: 4px;
+    border: none;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+    box-shadow: none;
+}
+
+.btn.btn-nav:hover {
+    color: #12509a;
+    background: #eaf3fa;
+}
+
+.flash-success {
+    background: #e6f9e6;
+    color: #218838;
+    border: 1px solid #b2e6b2;
+    border-radius: 6px;
+    padding: 12px 18px;
+    margin-bottom: 18px;
+    font-size: 1em;
+    text-align: center;
+    box-shadow: 0 1px 4px rgba(33,136,56,0.07);
+}
+
+.flash-error {
+    background: #ffeaea;
+    color: #c82333;
+    border: 1px solid #f5bcbc;
+    border-radius: 6px;
+    padding: 12px 18px;
+    margin-bottom: 18px;
+    font-size: 1em;
+    text-align: center;
+    box-shadow: 0 1px 4px rgba(200,35,51,0.07);
+}
+
+.home-bg {
+    background: url("/static/img/background.jpg") no-repeat center center fixed;
+    background-size: cover;
+}
+
+.centered-block {
+    margin: 20px auto;
+    max-width: 600px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+    padding: 32px 24px;
+}
+
+.center-text {
+    text-align: center;
+}
+
+.map-block {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 0;
+}
+
+.btn-map {
+    background: var(--main-blue);
+    color: #fff;
+    font-size: 1.1em;
+    padding: 16px 44px;
+    border-radius: 8px;
+    transition: background 0.2s;
+    box-shadow: 0 1px 8px rgba(44, 62, 80, 0.08);
+    margin-top: 10px;
+}
+
+.btn-map:hover {
+    background: #12509a;
+}
+
+.footer {
+    width: 100%;
+    background: var(--main-blue);
+    color: #fff;
+    text-align: center;
+    padding: 18px 0 14px 0;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    font-size: 1em;
+    z-index: 50;
+    box-shadow: 0 -2px 8px rgba(44, 62, 80, 0.08);
+}
+
+.footer-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.footer-brand {
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.footer-mail {
+    font-style: italic;
+}
+
+.footer-separator {
+    margin: 0 6px;
+    color: #e0e6ed;
+}
+
+.footer-copy {
+    font-size: 0.98em;
+}
+
+.map-form {
+    margin-bottom: 24px;
+    background: #f7f7f7;
+    padding: 18px;
+    border-radius: 8px;
+    max-width: 500px;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.form-group {
+    margin-bottom: 12px;
+    width: 100%;
+}
+
+.form-btns {
+    margin-bottom: 8px;
+    display: flex;
+    gap: 6px;
+}
+
+.location-label {
+    display: block;
+    margin-bottom: 6px;
+    position: static;
+    font-weight: 500;
+    max-width: 100%;
+    word-break: break-word;
+}
+
+.location-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #bbb;
+}
+
+.buffer-input {
+    width: 100px;
+    box-sizing: border-box;
+    padding: 6px;
+    border-radius: 4px;
+    border: 1px solid #bbb;
+}
+
+.satellite-select {
+    width: 150px;
+    box-sizing: border-box;
+    padding: 6px;
+    border-radius: 4px;
+    border: 1px solid #bbb;
+}
+
+.map-placeholder {
+    height: 400px;
+    background: #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    margin-top: 12px;
+    overflow: hidden;
+    width: 100%;
+}

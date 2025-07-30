@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mapa – wyszukiwanie lokalizacji</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    :root {
+      --main-blue: #1976d2;
+      --dark-blue: #004ba0;
+      --light-gray: #f2f2f2;
+      --font-main: 'Segoe UI', sans-serif;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-main);
+      background: linear-gradient(to right, #dbefff, #e6f7ff);
+      min-height: 100vh;
+    }
+
+    .navbar {
+      background: var(--main-blue);
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .navbar h1 {
+      font-size: 20px;
+      margin: 0;
+    }
+
+    .navbar a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      padding: 6px 12px;
+      border: 1px solid white;
+      border-radius: 4px;
+      transition: background 0.2s ease;
+    }
+
+    .navbar a:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .map-container {
+      background: white;
+      max-width: 600px;
+      margin: 40px auto 20px;
+      padding: 30px 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .form-btns {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .form-btns button {
+      flex: 1;
+      padding: 10px;
+      font-size: 14px;
+      border: none;
+      border-radius: 6px;
+      background: var(--main-blue);
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .form-btns button:hover {
+      background: var(--dark-blue);
+    }
+
+    .form-btns .active {
+      background: var(--dark-blue);
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      color: #444;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+
+    button.btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--main-blue);
+      color: white;
+      font-size: 15px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button.btn:hover {
+      background: var(--dark-blue);
+    }
+
+    #map-section {
+      display: none;
+      margin: 40px auto;
+      max-width: 1000px;
+      padding: 0 20px;
+    }
+
+    #map-section {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      padding: 40px 20px;
+      max-width: 1000px;
+      margin: 40px auto;
+    }
+
+    #map-tools {
+      width: 300px;
+      background: #f7f7f7;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      font-size: 14px;
+      color: #333;
+    }
+
+    #leafletMap {
+      height: 600px;
+      flex: 1;
+      border-radius: 12px;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    #cursorCoords {
+      padding: 8px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      min-height: 30px;
+    }
+
+    .alert {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px;
+      border-radius: 5px;
+      color: white;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.5s;
+      display: none;
+    }
+    .alert.success {
+      background-color: #4CAF50;
+    }
+    .alert.error {
+      background-color: #f44336;
+    }
+    .alert.show {
+      opacity: 1;
+    }
+
+    @media (max-width: 768px) {
+      .map-container {
+        margin: 20px 10px;
+        padding: 20px;
+      }
+
+      #leafletMap {
+        height: 400px;
+      }
+
+      #map-section {
+        flex-direction: column;
+        max-width: 90%;
+        padding: 10px;
+      }
+
+      #map-tools {
+        width: 100%;
+        margin-bottom: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="alert" class="alert"></div>
+
+  <div class="navbar">
+    <h1>Mapa Lokalizacji</h1>
+    <a href="http://127.0.0.1:5000/">Powrót</a>
+  </div>
+
+  <div class="map-container" id="form-section">
+    <h2>Wyszukaj lokalizację</h2>
+    <form id="showMapForm">
+      <div class="form-btns">
+        <button type="button" id="cityBtn" class="btn active">Miasto</button>
+        <button type="button" id="coordsBtn" class="btn">Współrzędne</button>
+      </div>
+      <div class="form-group">
+        <label for="location" id="locationLabel">Miasto:</label>
+        <input type="text" id="location" name="location" placeholder="np. Kielce" required />
+      </div>
+      <div class="form-group">
+        <label for="buffer">Bufor (km):</label>
+        <input type="number" id="buffer" name="buffer" min="1" max="50" value="5" required />
+      </div>
+      <div class="form-group">
+        <label for="satellite">Wybierz satelitę:</label>
+        <select id="satellite" name="satellite" required>
+          <option value="sentinel1">Sentinel-1</option>
+          <option value="sentinel2">Sentinel-2</option>
+        </select>
+      </div>
+      <button type="submit" class="btn">Pokaż na mapie</button>
+    </form>
+  </div>
+
+  <div style="max-width: 600px; margin: 0 auto 40px;">
+    <button id="downloadBtn" class="btn">Pobierz zdjęcie satelitarne</button>
+  </div>
+
+  <div id="map-section">
+    <div id="map-tools">
+      <h3>Narzędzia</h3>
+      <div class="form-group">
+        <label for="bufferControl"><strong>Zmiana bufora (km):</strong></label>
+        <input type="number" id="bufferControl" min="1" max="50" value="5" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;" />
+        <div class="form-group">
+          <label for="locationName"><strong>Aktualna miejscowość:</strong></label>
+          <input type="text" id="locationName" placeholder="Wpisz nazwę miejscowości" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;"/>
+          <button id="goToLocationBtn" class="btn" style="margin-top: 8px;">Przejdź do miejscowości</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label><strong>Współrzędne kursora:</strong></label>
+        <div id="cursorCoords">Najedź na mapę...</div>
+      </div>
+
+      <div class="form-group">
+        <button id="toggleBufferBtn" class="btn">Ukryj bufor</button>
+      </div>
+    </div>
+
+    <div id="leafletMap"></div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const GEOAPIFY_KEY = "ceb6c0c38bd541ba9639dcdcd7c8725f";
+
+    function showAlert(message, type) {
+      const alert = document.getElementById('alert');
+      alert.textContent = message;
+      alert.className = `alert ${type} show`;
+      alert.style.display = 'block';
+      
+      setTimeout(() => {
+        alert.classList.remove('show');
+        setTimeout(() => {
+          alert.style.display = 'none';
+        }, 500);
+      }, 3000);
+    }
+
+    const cityBtn = document.getElementById('cityBtn');
+    const coordsBtn = document.getElementById('coordsBtn');
+    const locationInput = document.getElementById('location');
+    const locationLabel = document.getElementById('locationLabel');
+    const showMapForm = document.getElementById('showMapForm');
+    const formSection = document.getElementById('form-section');
+    const mapSection = document.getElementById('map-section');
+
+    let leafletMap = null;
+    let marker = null;
+    let bufferRectangle = null;
+
+    cityBtn.addEventListener('click', () => {
+      locationLabel.textContent = "Miasto:";
+      locationInput.placeholder = "np. Kielce";
+      cityBtn.classList.add('active');
+      coordsBtn.classList.remove('active');
+    });
+
+    coordsBtn.addEventListener('click', () => {
+      locationLabel.textContent = "Współrzędne:";
+      locationInput.placeholder = "np. 50.8661, 20.6286";
+      coordsBtn.classList.add('active');
+      cityBtn.classList.remove('active');
+    });
+
+    async function updateLocationName(lat, lon) {
+      try {
+        const resp = await fetch(`https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lon}&apiKey=${GEOAPIFY_KEY}`);
+        const data = await resp.json();
+        if (data.features && data.features.length > 0) {
+          const props = data.features[0].properties;
+          const city = props.city || props.town || props.village || props.county || "Brak danych";
+          document.getElementById('locationName').value = city;
+        } else {
+          document.getElementById('locationName').value = "Brak danych";
+        }
+      } catch {
+        document.getElementById('locationName').value = "Błąd pobierania";
+      }
+    }
+
+    function setMarkerAndUpdate(lat, lon) {
+      if (marker) {
+        marker.setLatLng([lat, lon]);
+      } else {
+        marker = L.marker([lat, lon], { draggable: true }).addTo(leafletMap);
+        marker.on('dragend', () => {
+          const pos = marker.getLatLng();
+          setMarkerAndUpdate(pos.lat, pos.lng);
+        });
+      }
+
+      const bufferKm = Number(bufferControl.value) || 5;
+      const degreeBuffer = bufferKm / 111;
+      const newBounds = [
+        [lat - degreeBuffer, lon - degreeBuffer],
+        [lat + degreeBuffer, lon + degreeBuffer]
+      ];
+
+      if (bufferRectangle) {
+        bufferRectangle.setBounds(newBounds);
+        if (!leafletMap.hasLayer(bufferRectangle)) {
+          bufferRectangle.addTo(leafletMap);
+          toggleBufferBtn.textContent = "Ukryj bufor";
+        }
+      } else {
+        bufferRectangle = L.rectangle(newBounds, { color: "#ff7800", weight: 2, fillOpacity: 0.2 }).addTo(leafletMap);
+      }
+
+      updateLocationName(lat, lon);
+    }
+
+    async function goToLocation(locationName) {
+      if (!locationName.trim()) {
+        showAlert("Proszę wpisać nazwę miejscowości", "error");
+        return;
+      }
+
+      try {
+        const geoRes = await fetch(`https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(locationName)}&apiKey=${GEOAPIFY_KEY}`);
+        const geoData = await geoRes.json();
+        
+        if (!geoData.features || geoData.features.length === 0) {
+          showAlert("Nie znaleziono podanej miejscowości", "error");
+          return;
+        }
+
+        const coords = geoData.features[0].geometry.coordinates;
+        leafletMap.setView([coords[1], coords[0]], 13);
+        setMarkerAndUpdate(coords[1], coords[0]);
+        showAlert(`Znaleziono: ${geoData.features[0].properties.formatted}`, "success");
+
+      } catch (err) {
+        showAlert("Błąd podczas wyszukiwania miejscowości: " + err.message, "error");
+      }
+    }
+
+    document.getElementById('goToLocationBtn').addEventListener('click', () => {
+      const locationName = document.getElementById('locationName').value;
+      goToLocation(locationName);
+    });
+
+    document.getElementById('locationName').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const locationName = document.getElementById('locationName').value;
+        goToLocation(locationName);
+      }
+    });
+
+    showMapForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      let location = locationInput.value.trim();
+      const bufferKm = Number(document.getElementById('buffer').value);
+
+      if (!location) {
+        showAlert("Proszę podać lokalizację.", "error");
+        return;
+      }
+
+      let coords;
+
+      if (cityBtn.classList.contains('active')) {
+        try {
+          const geoRes = await fetch(`https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(location)}&apiKey=${GEOAPIFY_KEY}`);
+          const geoData = await geoRes.json();
+          if (!geoData.features || geoData.features.length === 0) {
+            showAlert("Nie znaleziono podanej lokalizacji.", "error");
+            return;
+          }
+          coords = geoData.features[0].geometry.coordinates;
+        } catch (err) {
+          showAlert("Błąd podczas geokodowania: " + err.message, "error");
+          return;
+        }
+      } else {
+        const parts = location.split(',');
+        if (parts.length !== 2) {
+          showAlert("Proszę podać współrzędne w formacie: lat, lon", "error");
+          return;
+        }
+        const lat = parseFloat(parts[0]);
+        const lon = parseFloat(parts[1]);
+        if (isNaN(lat) || isNaN(lon)) {
+          showAlert("Nieprawidłowe współrzędne.", "error");
+          return;
+        }
+        coords = [lon, lat];
+      }
+
+      formSection.style.display = "none";
+      mapSection.style.display = "flex";
+
+      if (!leafletMap) {
+        leafletMap = L.map('leafletMap').setView([coords[1], coords[0]], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '© OpenStreetMap'
+        }).addTo(leafletMap);
+
+        leafletMap.on('mousemove', (e) => {
+          const { lat, lng } = e.latlng;
+          document.getElementById('cursorCoords').textContent = `Lat: ${lat.toFixed(5)}, Lon: ${lng.toFixed(5)}`;
+        });
+
+        leafletMap.on('mouseout', () => {
+          document.getElementById('cursorCoords').textContent = 'Najedź na mapę...';
+        });
+
+        leafletMap.on('click', (e) => {
+          const { lat, lng } = e.latlng;
+          setMarkerAndUpdate(lat, lng);
+        });
+
+      } else {
+        leafletMap.setView([coords[1], coords[0]], 13);
+      }
+
+      setMarkerAndUpdate(coords[1], coords[0]);
+    });
+
+    const bufferControl = document.getElementById('bufferControl');
+    bufferControl.addEventListener('input', () => {
+      if (marker && leafletMap) {
+        const pos = marker.getLatLng();
+        setMarkerAndUpdate(pos.lat, pos.lng);
+      }
+    });
+
+    const toggleBufferBtn = document.getElementById('toggleBufferBtn');
+    toggleBufferBtn.addEventListener('click', () => {
+      if (!bufferRectangle) return;
+      if (leafletMap.hasLayer(bufferRectangle)) {
+        leafletMap.removeLayer(bufferRectangle);
+        toggleBufferBtn.textContent = "Pokaż bufor";
+      } else {
+        bufferRectangle.addTo(leafletMap);
+        toggleBufferBtn.textContent = "Ukryj bufor";
+      }
+    });
+
+    const downloadBtn = document.getElementById('downloadBtn');
+    downloadBtn.addEventListener('click', async () => {
+      if (!marker) {
+        showAlert("Najpierw wybierz lokalizację na mapie.", "error");
+        return;
+      }
+
+      const pos = marker.getLatLng();
+      const buffer = parseFloat(document.getElementById("bufferControl").value) || 5;
+      const satellite = document.getElementById("satellite").value;
+      
+      const degreeBuffer = buffer / 111;
+      const corners = {
+        nw: { lat: pos.lat + degreeBuffer, lon: pos.lng - degreeBuffer },
+        ne: { lat: pos.lat + degreeBuffer, lon: pos.lng + degreeBuffer },
+        se: { lat: pos.lat - degreeBuffer, lon: pos.lng + degreeBuffer },
+        sw: { lat: pos.lat - degreeBuffer, lon: pos.lng - degreeBuffer }
+      };
+
+      try {
+        showAlert("⌛ Pobieranie zdjęcia satelitarnego...", "success");
+        
+        const response = await fetch('/download_image', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            corners,
+            satellite
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Błąd serwera');
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `satelita_${satellite}_${pos.lat.toFixed(4)}_${pos.lng.toFixed(4)}.tiff`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+        
+        showAlert("✅ Zdjęcie pobrane pomyślnie", "success");
+
+      } catch (error) {
+        console.error('Błąd pobierania:', error);
+        showAlert(`❌ Błąd: ${error.message}`, "error");
+      }
+    });
+  </script>
+</body>
+</html>
