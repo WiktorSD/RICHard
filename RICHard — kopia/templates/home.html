@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Witaj</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="home-bg">
+    <nav class="navbar">
+        <div class="navbar-left">
+            <span class="navbar-brand">RICHard</span>
+            <a href="#" class="nav-link">Strona główna</a>
+            <a href="#" class="nav-link">O nas</a>
+            <a href="#" class="nav-link">Kontakt</a>
+        </div>
+        <div class="navbar-right">
+            {% if username %}
+                <span class="navbar-user">Witaj, {{ username }}!</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-nav">Wyloguj się</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-nav">Zaloguj się</a>
+            {% endif %}
+        </div>
+    </nav>
+    <div class="home-container">
+        <div class="centered-block" style="margin-top: 10px;">
+            <h2 class="center-text">O projekcie</h2>
+            <p class="center-text">
+                Nasza strona służy do mapowania województwa świętokrzyskiego z wykorzystaniem danych satelitarnych Sentinel-1 i Sentinel-2. 
+                Dzięki temu możesz w nowoczesny sposób analizować i wizualizować zmiany zachodzące w regionie.
+            </p>
+        </div>
+        <div class="centered-block map-block" style="max-width: 700px; padding: 40px 24px;">
+            <h2 class="center-text" style="margin-bottom: 18px;">Przejdź do map</h2>
+            <a href="{{ url_for('map') }}" class="btn btn-map center-text">Przejdź do map</a>
+        </div>
+    </div>
+    <footer class="footer">
+        <div class="footer-content">
+            <span class="footer-brand">RICHard</span>
+            <span class="footer-separator">|</span>
+            <span class="footer-mail">mail kontaktowy: 000@000</span>
+            <span class="footer-separator">|</span>
+            <span class="footer-copy">&copy; 2025</span>
+        </div>
+    </footer>
+</body>
+</html>

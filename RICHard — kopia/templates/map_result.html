@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Mapa z granicami województw</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    const GEOAPIFY_KEY = "ceb6c0c38bd541ba9639dcdcd7c8725f";
+
+    const map = L.map('map').setView([52.1, 19.5], 6);
+
+    // Warstwa bazowa OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // 🔁 Wczytanie województw z geojsona
+    fetch('{{ url_for("static", filename="polska-wojewodztwa.geojson") }}')
+      .then(res => res.json())
+      .then(data => {
+        L.geoJSON(data, {
+          style: {
+            color: '#333',
+            weight: 2,
+            fillOpacity: 0.1
+          },
+          onEachFeature: function (feature, layer) {
+            const name = feature.properties.nazwa || "Brak nazwy";
+            layer.bindPopup(`<strong>${name}</strong>`);
+          }
+        }).addTo(map);
+      })
+      .catch(err => console.error("Błąd geojson:", err));
+
+    // 🖱️ Klikanie - marker + bufor + Geoapify
+    let marker = null;
+    let buffer = null;
+
+    map.on("click", async function (e) {
+      const { lat, lng } = e.latlng;
+
+      if (marker) map.removeLayer(marker);
+      if (buffer) map.removeLayer(buffer);
+
+      marker = L.marker([lat, lng]).addTo(map);
+
+      const label = await getPlaceLabel(lat, lng);
+      marker.bindPopup(label).openPopup();
+
+      // Bufor (5 km w stopniach)
+      const offset = 5 / 111;
+      const bounds = [
+        [lat - offset, lng - offset],
+        [lat + offset, lng + offset]
+      ];
+      buffer = L.rectangle(bounds, {
+        color: "red",
+        weight: 2,
+        fillOpacity: 0.1
+      }).addTo(map);
+    });
+
+    async function getPlaceLabel(lat, lon) {
+      const url = `https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lon}&lang=pl&format=json&apiKey=${GEOAPIFY_KEY}`;
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        const props = data?.results?.[0] || {};
+        return `
+          <b>Miasto:</b> ${props.city || props.town || props.village || props.suburb || "brak"}<br>
+          <b>Powiat:</b> ${props.county || "brak"}<br>
+          <b>Województwo:</b> ${props.state || "brak"}<br>
+          <small>Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}</small>
+        `;
+      } catch (err) {
+        return "Brak danych";
+      }
+    }
+
+    fetch('/download_image', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ center, corners })
+})
+.then(response => {
+    if (!response.ok) throw new Error("Błąd pobierania");
+    return response.blob();
+})
+.then(blob => {
+    console.log("📥 Otrzymano odpowiedź (plik):", blob);
+})
+.catch(error => {
+    console.error("❌ Błąd pobierania:", error);
+});
+
+  </script>
+</body>
+</html>
